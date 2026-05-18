@@ -12,7 +12,7 @@ node_modules/
 */.env.development.local
 */.env.production.local
 
-# build folders
+# build outputs
 dist/
 build/
 .next/
@@ -20,7 +20,7 @@ out/
 */dist/
 */build/
 
-# prisma generated client
+# Prisma generated client
 backend/src/generated/prisma/
 src/generated/prisma/
 
