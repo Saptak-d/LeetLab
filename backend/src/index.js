@@ -18,7 +18,7 @@ app.get("/",(req,res)=>{
     res.send("hellow Guys welcome to leetlab 🚀")
 })
 
-app.use("api/v1/auth",authRoutes)
+app.use("/api/v1/auth",authRoutes)
 
 app.listen(process.env.PORT,()=>{
  console.log("server is running on port 8080")

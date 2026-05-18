@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken"
 
 export const register = async(req,res)=>{
     const {email,password,name} = req.body
+    console.log("Sssssssss")
 
     try {
         const existinguser = await db.user.findUnique({
