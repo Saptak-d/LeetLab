@@ -66,7 +66,7 @@ export const register = async(req,res)=>{
 export const login = async(req,res)=>{
     const {email , password} = req.body;
     try {
-        const user = db.user.findUnique({
+        const user = await db.user.findUnique({
             where : {
                 email
             }
@@ -75,7 +75,7 @@ export const login = async(req,res)=>{
     if(!user){
         return res.status(401).json({error : "user not found"})
     }
-
+        console.log("user",user)
      const ispasswordCorrect = await bcrypt.compare(password,user.password);
 
      if(!ispasswordCorrect){
