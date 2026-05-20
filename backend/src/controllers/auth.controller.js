@@ -43,6 +43,7 @@ export const register = async(req,res)=>{
       }) 
       .status(201)
       .json({
+        success : true ,
         message : "User is created successfully",
         user : {
             id : newUser.id,
@@ -98,6 +99,7 @@ export const login = async(req,res)=>{
 
       res.status(200)
        .json({
+        success : true ,
         message : "user login Successfully",
         user : {
             id : user.id,
@@ -114,6 +116,22 @@ export const login = async(req,res)=>{
     }
 }
 
-export const logout = async(req,res)=>{}
+export const logout = async(req,res)=>{
+    try {
+
+       res.clearCookie("jwt",{
+        httpOnly : true ,
+        smaeSite : "strict",
+        secure : process.env.NODE_ENV !== "development"
+       })
+
+       res.status(204).json({
+        success : true,
+        message : "logged out successfully"})
+        
+    } catch (error) {
+        
+    }
+}
 
 export const check = async(req,res)=>{}
