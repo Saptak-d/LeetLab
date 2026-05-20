@@ -130,8 +130,11 @@ export const logout = async(req,res)=>{
         message : "logged out successfully"})
         
     } catch (error) {
-        
-    }
+          console.log("Errr logout  user",error)
+          res.status(500).json({
+            error : "Error Logout user"
+         })
+     }
 }
 
 export const check = async(req,res)=>{}
