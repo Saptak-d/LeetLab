@@ -63,7 +63,56 @@ export const register = async(req,res)=>{
 }
 
 
-export const login = async(req,res)=>{}
+export const login = async(req,res)=>{
+    const {email , password} = req.body;
+    try {
+        const user = db.user.findUnique({
+            where : {
+                email
+            }
+        })
+
+    if(!user){
+        return res.status(401).json({error : "user not found"})
+    }
+
+     const ispasswordCorrect = await bcrypt.compare(password,user.password);
+
+     if(!ispasswordCorrect){
+        throw res.status(401)
+         .json({
+            error : "Invalid credentials"
+         })
+     }
+
+     const token = jwt.sign({id : user.id},process.env.JWT_SECRET,{
+        expiresIn : "7d"
+     })
+
+      res.cookie("jwt",token,{
+        httpOnly : true ,
+        smaeSite : "strict",
+        secure : process.env.NODE_ENV !== "development",
+        maxAge : 1000 * 60 * 60 * 24 * 7
+      })
+
+      res.status(200)
+       .json({
+        message : "user login Successfully",
+        user : {
+            id : user.id,
+            email : user.email,
+            name :user.name ,
+        }
+       })
+        
+    } catch (error) {
+        console.log("Errr login user",error)
+        res.status(500).json({
+            error : "Error loginUser user"
+        })
+    }
+}
 
 export const logout = async(req,res)=>{}
 
