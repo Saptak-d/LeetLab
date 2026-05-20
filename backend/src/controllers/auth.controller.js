@@ -63,7 +63,6 @@ export const register = async(req,res)=>{
     }
 }
 
-
 export const login = async(req,res)=>{
     const {email , password} = req.body;
     try {
@@ -118,14 +117,12 @@ export const login = async(req,res)=>{
 
 export const logout = async(req,res)=>{
     try {
-
        res.clearCookie("jwt",{
         httpOnly : true ,
         smaeSite : "strict",
         secure : process.env.NODE_ENV !== "development"
        })
-
-       res.status(204).json({
+       res.status(200).json({
         success : true,
         message : "logged out successfully"})
         
@@ -137,4 +134,15 @@ export const logout = async(req,res)=>{
      }
 }
 
-export const check = async(req,res)=>{}
+export const check = async(req,res)=>{
+    try {
+        res.status(200)
+         .json({
+            success : true,
+            message : "user Authenticated successfully"
+         })
+        
+    } catch (error) {
+        
+    }
+}
