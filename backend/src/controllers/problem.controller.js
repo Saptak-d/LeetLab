@@ -1,5 +1,5 @@
 import { db } from "../libs/db.js"
-import { getJudge0LanguageId } from "../libs/judge0.lib.js";
+import { getJudge0LanguageId, submitBatch } from "../libs/judge0.lib.js";
 
 
 
@@ -29,7 +29,12 @@ const {title,description,difficulty,tags,examples,constrains,testcases,codeSnipp
 
         }))
 
-        const submissionResult = await submitBatch(submissions)
+        const submissionResults = await submitBatch(submissions)
+
+        const tokens = submissionResults.map((res)=>res.token)
+
+        const results = await pollVatchResults(tokens);
+        
     }
 
     
