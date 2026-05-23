@@ -1,5 +1,7 @@
+import { data } from "react-router-dom";
 import { db } from "../libs/db.js"
-import { getJudge0LanguageId, submitBatch } from "../libs/judge0.lib.js";
+import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
+import { json } from "express";
 
 
 
@@ -13,7 +15,6 @@ const {title,description,difficulty,tags,examples,constrains,testcases,codeSnipp
     })
   }
 //loop through each and every  solution for different languages 
-
  try {
     for(const [language , solutionCode] of Object.entries(referenceSolutions)){
         const languageId = getJudge0LanguageId(language);
@@ -26,20 +27,51 @@ const {title,description,difficulty,tags,examples,constrains,testcases,codeSnipp
             language_id : languageId,
             stdin : input,
             expected_output : output
-
         }))
 
         const submissionResults = await submitBatch(submissions)
-
         const tokens = submissionResults.map((res)=>res.token)
-
-        const results = await pollVatchResults(tokens);
+        const results = await pollBatchResults(tokens);
         
-    }
+        for(let i  =  0  ;  i < results.length ; i++){
+            const result = results[i];
+            if(result.status.id !== 3){
+                return res.status(400).json({
+                    error :`Testcase ${i+1} failed for language ${language}`
+                })
+            }
+        }
 
+    }
+        //save the problem to the DB
+        const newProblem = await db.problem.create({
+            data:{
+                title,
+                description,
+                difficulty,
+                tags,
+                examples,
+                constrains,
+                testcases,
+                codeSnippets,
+                referenceSolutions,
+                userId : req.user.id,
+            }
+        })
+
+        return res.status(201).json({
+            success : true,
+            message : "The new problem is Created successfully",
+            problem : newProblem,
+        })
     
  } catch (error) {
     
+    console.error("Error in create-problem controlller -",error)
+    res.status(400)
+    json({
+        error : "Error create-Problem user"
+    })
  }
 // 
 //
