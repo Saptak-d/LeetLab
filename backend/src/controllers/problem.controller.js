@@ -1,52 +1,62 @@
-import { data } from "react-router-dom";
-import { db } from "../libs/db.js"
-import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
-import { json } from "express";
 
+import { db } from "../libs/db.js"
+import { json } from "express";
+import { runCode } from "../libs/jdoodle.lib.js";
 
 
 export const createProblem = async(req , res)=>{
-//going to get all the data from the request body
-const {title,description,difficulty,tags,examples,constrains,testcases,codeSnippets,referenceSolutions} = req.body ;
-//going to check the user role once again
-  if(req.user.role != "Admin"){
+ const {
+    title,
+    description,
+    difficulty,
+    tags,
+    examples,
+    constrains,
+    testcases,
+    codeSnippets,
+    referenceSolutions,
+  } = req.body;
+
+
+  if(req.user.role != "ADMIN"){
     return res.status(403).json({
         error : "You are not allowed create the a problem"
     })
   }
+
+
 //loop through each and every  solution for different languages 
  try {
     for(const [language , solutionCode] of Object.entries(referenceSolutions)){
-        const languageId = getJudge0LanguageId(language);
-        if(!languageId){
-            return res.status(400).json({error : `The Language ${language} is not supported`})
-        }
+         for(let i = 0 ; i < testcases.length ; i++){
+            const {input , output} = testcases[i];
 
-        const submissions = testcases.map(({input , output})=>({
-            source_code : solutionCode ,
-            language_id : languageId,
-            stdin : input,
-            expected_output : output
-        }))
+                const result = await runCode(language,solutionCode,input)
 
-        const submissionResults = await submitBatch(submissions)
-        const tokens = submissionResults.map((res)=>res.token)
-        const results = await pollBatchResults(tokens);
-        
-        for(let i  =  0  ;  i < results.length ; i++){
-            const result = results[i];
-            if(result.status.id !== 3){
-                return res.status(400).json({
-                    error :`Testcase ${i+1} failed for language ${language}`
-                })
+                if(result.run.code !== 0){
+                    return res.status(400).json({
+                           error: `Runtime/Compile error for language ${language}`,
+                           testcase: i + 1,
+                           stderr: result.run.stderr,
+                    })
+                }
+
+                  const actualOutput = result.run.stdout.trim();
+                  const expectedOutput = output.trim();
+
+                 if (actualOutput !== expectedOutput) {
+                   return res.status(400).json({
+                     error: `Testcase ${i + 1} failed for language ${language}`,
+                      expected: expectedOutput,
+                      got: actualOutput,
+                      });
+                   }
             }
-        }
+         }
 
-    }
-        //save the problem to the DB
-        const newProblem = await db.problem.create({
+         const newProblem = await db.problem.create({
             data:{
-                title,
+                title ,
                 description,
                 difficulty,
                 tags,
@@ -55,27 +65,29 @@ const {title,description,difficulty,tags,examples,constrains,testcases,codeSnipp
                 testcases,
                 codeSnippets,
                 referenceSolutions,
-                userId : req.user.id,
+                userId : req.user?.id
             }
-        })
+         })
+         
+          return res.status(201).json({
+      success: true,
+      message: "The new problem is created successfully",
+      problem: newProblem,
+    }); 
 
-        return res.status(201).json({
-            success : true,
-            message : "The new problem is Created successfully",
-            problem : newProblem,
-        })
-    
  } catch (error) {
-    
-    console.error("Error in create-problem controlller -",error)
-    res.status(400)
-    json({
-        error : "Error create-Problem user"
-    })
- }
-// 
-//
+     if (error.response?.status === 429) {
+    return {
+      run: {
+        code: 1,
+        stdout: "",
+        stderr: "JDoodle daily limit reached. Try tomorrow or reduce test executions.",
+      },
+    };
+  }
 
+  throw error;
+ }
 }
 
 export const getAllProblems = async(req,res)=>{}

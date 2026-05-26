@@ -51,10 +51,11 @@ export const authMiddleware = async(req , res , next)=>{
 
 export const checkAdmin = async(req,res,next)=>{
   try {
-    const userId = req.user.userId;
+    const userId =  req.user.id;
     const user  = await db.user.findUnique({
         where : {
-        id :     userId
+        id:userId
+
         },
         select : {
             role : true
@@ -70,6 +71,6 @@ export const checkAdmin = async(req,res,next)=>{
 
   } catch (error) {
      console.error("Error checking admon role:",error)
-     res.status(500).json({message : "Error checking admin role "})
+     res.status(500).json({message : "Error checking admin role 222"})
   }
 }
