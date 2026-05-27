@@ -260,6 +260,40 @@ for (const [language, solutionCode] of Object.entries(finalReferenceSolution)) {
   }
 }
 
-export const deleteProblem = async(req,res)=>{}
+export const deleteProblem = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const problem = await db.problem.findUnique({
+      where: { id },
+    });
+
+    if (!problem) {
+      return res.status(404).json({
+        success: false,
+        error: "Problem not found",
+      });
+    }
+
+    await db.problem.delete({
+      where: { id },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Problem deleted successfully",
+    });
+
+  } catch (error) {
+
+    console.error("DELETE_PROBLEM_ERROR", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
 
 export const getAllProblemsSolvedByUser = async(req,res)=>{} 
