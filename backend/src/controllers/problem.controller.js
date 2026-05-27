@@ -113,9 +113,152 @@ export const getAllProblems = async(req,res)=>{
 
 }
 
-export const getProblemById = async(req,res)=>{}
+export const getProblemById = async(req,res)=>{
 
-export const updateProblem = async(req,res)=>{}
+  try {
+
+    const {id} = req.params;
+
+     const problem = await db.problem.findUnique({
+      where : {
+        id
+      }
+     })
+
+     if(!problem){
+
+         return res.status(404)
+          .json({
+            error : "No problem is found"
+          })
+     }
+
+     return res
+      .status(200)
+      .json({
+        success : true ,
+        message : "problem fetched Successfully",
+        problem 
+      })
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      error : "Error while  fetching problem"
+    })
+  }
+}
+
+export const updateProblem = async(req,res)=>{
+
+  try {
+    const {id} = req.params;
+    const problem = await db.problem.findUnique({
+      where : {
+        id
+      }
+    })
+
+    if(!problem){
+      return res
+         .status(404)
+         .json({
+          error : "Problem is not Found"
+         })
+    }
+     const allowedFields = [
+      "title",
+      "description",
+      "difficulty",
+      "tags",
+      "examples",
+      "constraints",
+      "testcases",
+      "codeSnippets",
+      "referenceSolutions",
+      "hints",
+      "editorial",
+    ];
+
+     const updateData = {};
+
+   for(const field of allowedFields){
+     if(req.body[field] !== undefined){
+      updateData[field] = req.body[field]
+     }
+   }
+
+   if(Object.keys(updateData).length === 0){
+     return res.status(400).json({
+      error : "No valid Fields provided for update"
+     })
+   }
+    // decide whether validation is needed
+    const shouldValidate = req.body.testcases !== undefined || req.body.referenceSolutions !== undefined;
+
+   if(shouldValidate){
+  const finalTestcases =
+    req.body.testcases ?? problem.testcases;
+
+   const finalReferenceSolution =
+         req.body.referenceSolutions ??
+         problem.referenceSolutions;
+
+for (const [language, solutionCode] of Object.entries(finalReferenceSolution)) {
+
+  for (const testcase of finalTestcases) {
+
+    const result = await runCode({
+      language,
+      code: solutionCode,
+      input: testcase.input,
+    });
+
+    if (!result || result.error) {
+      return res.status(400).json({
+        success: false,
+        error: `Code execution failed for ${language}`,
+      });
+    }
+
+    const actualOutput =
+      result.output?.toString().trim();
+
+    const expectedOutput =
+      testcase.output?.toString().trim();
+
+    if (actualOutput !== expectedOutput) {
+      return res.status(400).json({
+        success: false,
+        error: `Reference solution failed for ${language}`,
+        language,
+        testcase,
+        expectedOutput,
+        actualOutput,
+      });
+    }
+  }
+}
+   }
+
+   const updatedProblem = await db.problem.update({
+        where : {id},
+        data : updateData
+       })
+
+        return res.status(200).json({
+      success: true,
+      message: "Problem updated successfully",
+      problem: updatedProblem,
+    });
+  } catch (error) {
+     console.error("UPDATE_PROBLEM_ERROR", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+}
 
 export const deleteProblem = async(req,res)=>{}
 
