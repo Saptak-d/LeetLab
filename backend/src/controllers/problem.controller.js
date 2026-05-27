@@ -11,20 +11,17 @@ export const createProblem = async(req , res)=>{
     difficulty,
     tags,
     examples,
-    constrains,
+    constraints,
     testcases,
     codeSnippets,
     referenceSolutions,
   } = req.body;
-
 
   if(req.user.role != "ADMIN"){
     return res.status(403).json({
         error : "You are not allowed create the a problem"
     })
   }
-
-
 //loop through each and every  solution for different languages 
  try {
     for(const [language , solutionCode] of Object.entries(referenceSolutions)){
@@ -61,7 +58,7 @@ export const createProblem = async(req , res)=>{
                 difficulty,
                 tags,
                 examples,
-                constrains,
+                constraints,
                 testcases,
                 codeSnippets,
                 referenceSolutions,
