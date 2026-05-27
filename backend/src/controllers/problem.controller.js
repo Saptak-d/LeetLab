@@ -1,6 +1,4 @@
-
 import { db } from "../libs/db.js"
-import { json } from "express";
 import { runCode } from "../libs/jdoodle.lib.js";
 
 
@@ -73,21 +71,47 @@ export const createProblem = async(req , res)=>{
     }); 
 
  } catch (error) {
+      console.log(error)
      if (error.response?.status === 429) {
-    return {
-      run: {
-        code: 1,
-        stdout: "",
-        stderr: "JDoodle daily limit reached. Try tomorrow or reduce test executions.",
-      },
-    };
-  }
-
-  throw error;
+       res.status(500)
+       .json({
+        error : "THe JDOODLE limit is expired try tomorrow"
+       })
+     }
+    return res.status(500).json({
+      error : "Error while Creating Problem"
+    })
  }
 }
 
-export const getAllProblems = async(req,res)=>{}
+export const getAllProblems = async(req,res)=>{
+
+  try {
+    
+    const problems = await db.problem.findManny()
+
+    if(!problems){
+        return res.status(404).json({
+          error : "No problems found"
+        })
+    }
+    
+    return res
+     .status(200)
+     .json({
+       success : true ,
+       message : "Message Fetched successfully",
+       problems
+     })
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      error : "Error while Creating fetching problem"
+    })
+  }
+
+}
 
 export const getProblemById = async(req,res)=>{}
 
