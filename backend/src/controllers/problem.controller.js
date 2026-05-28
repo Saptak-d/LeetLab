@@ -88,7 +88,7 @@ export const getAllProblems = async(req,res)=>{
 
   try {
     
-    const problems = await db.problem.findManny()
+    const problems = await db.problem.findMany();
 
     if(!problems){
         return res.status(404).json({
@@ -194,9 +194,18 @@ export const updateProblem = async(req,res)=>{
      })
    }
     // decide whether validation is needed
-    const shouldValidate = req.body.testcases !== undefined || req.body.referenceSolutions !== undefined;
+  const testcasesChanged =
+  req.body.testcases !== undefined &&
+  JSON.stringify(req.body.testcases) !== JSON.stringify(problem.testcases);
+
+const referenceSolutionsChanged =
+  req.body.referenceSolutions !== undefined &&
+  JSON.stringify(req.body.referenceSolutions) !== JSON.stringify(problem.referenceSolutions);
+
+const shouldValidate = testcasesChanged || referenceSolutionsChanged;
 
    if(shouldValidate){
+    
   const finalTestcases =
     req.body.testcases ?? problem.testcases;
 
@@ -296,4 +305,16 @@ export const deleteProblem = async (req, res) => {
   }
 };
 
-export const getAllProblemsSolvedByUser = async(req,res)=>{} 
+export const getAllProblemsSolvedByUser = async(req,res)=>{
+  const {id} = req.params;
+   try {
+    const problem = await db.problem.findManny({
+      where : {
+        solvedBy:req.user.id
+      }
+    })
+    
+   } catch (error) {
+    
+   }
+} 

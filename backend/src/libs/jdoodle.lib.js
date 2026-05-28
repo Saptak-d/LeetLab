@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const JDOODLE_API = "https://api.jdoodle.com/v1/execute";
+const JDOODLE_API = process.env.JDOODLE_API;
 
 const jdoodleRuntime = {
   javascript: {
@@ -32,6 +32,7 @@ export const runCode = async (language, sourceCode, input) => {
     language: runtime.language,
     versionIndex: runtime.versionIndex,
   });
+  console.log(data)
 
   const hasError =
     data.error ||
