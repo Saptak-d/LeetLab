@@ -217,11 +217,7 @@ for (const [language, solutionCode] of Object.entries(finalReferenceSolution)) {
 
   for (const testcase of finalTestcases) {
 
-    const result = await runCode({
-      language,
-      code: solutionCode,
-      input: testcase.input,
-    });
+    const result = await runCode(language, solutionCode,testcase.input);
 
     if (!result || result.error) {
       return res.status(400).json({
@@ -230,8 +226,7 @@ for (const [language, solutionCode] of Object.entries(finalReferenceSolution)) {
       });
     }
 
-    const actualOutput =
-      result.output?.toString().trim();
+    const actualOutput = result.run.stdout.trim();
 
     const expectedOutput =
       testcase.output?.toString().trim();
