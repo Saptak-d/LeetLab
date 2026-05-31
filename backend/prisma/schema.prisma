@@ -28,12 +28,14 @@ model User {
   name  String?
   email String   @unique
   password String
-  image String?
+  image String? 
   role  UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   problem Problem[]
+  submission Submission[]
+  problemsSolved ProblemSolved[]
   
 }
 
@@ -55,8 +57,31 @@ model Problem {
   updatedAt DateTime @updatedAt
 
 //RelationShip
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submission Submission[]
+  solvedBy ProblemSolved[]
+}
+
+model Submission {
+  id String @id @default(uuid())
+  userId String
+  problemId String
+  sourceCode Json
+  language String
+  stdin String?
+  stdout String?
+  stderr String
+  compileOutput String
+  status String
+  memory String
+  time String
+   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+//RelationShip
 user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-
+problem Problem @relation(fields: [problemId],references: [id],onDelete: Cascade)
+testCases TestCaseResult[]
 
 }
+
