@@ -44,23 +44,27 @@ model Problem {
 }
 
 model Submission {
-  id            String           @id @default(uuid())
+  id            String  @id @default(uuid())
   userId        String
   problemId     String
   sourceCode    Json
   language      String
   stdin         String?
   stdout        String?
-  stderr        String
-  compileOutput String
+
+  stderr        String?
+  compileOutput String?
   status        String
-  memory        String
-  time          String
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  problem       Problem          @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  testCases     TestCaseResult[]
+  memory        String?
+  time          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  testCases TestCaseResult[]
 }
 
 model TestCaseResult {
