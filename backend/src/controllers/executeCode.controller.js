@@ -40,7 +40,7 @@ export const executeCode = async(req,res)=>{
                    expected: expected_output,
                    stderr: result.error || null,
                    compile_output: !result.isExecutionSuccess && result.output ? result.output : null,
-                   status: result.isExecutionSuccess,
+                   status: !result.isExecutionSuccess? "Execution Error" : passed? "Accepted" : "Wrong Answer",
                    memory: result.memory ? `${result.memory} KB` : undefined,
                     time: result.cpuTime ? `${result.cpuTime} s` : "N/A",
             }
