@@ -19,6 +19,7 @@ export const executeCode = async(req,res)=>{
       for(let i = 0 ; i < stdin.length ; i++){
  
          let result  = await runCode2(language,source_code,stdin[i])
+         console.log(result);
 
          finalResponse.push(result)
       }
@@ -38,7 +39,7 @@ export const executeCode = async(req,res)=>{
                   stdout,
                    expected: expected_output,
                    stderr: result.error || null,
-                   compile_output: result.isCompiled || null,
+                   compile_output: !result.isExecutionSuccess && result.output ? result.output : null,
                    status: result.isExecutionSuccess,
                    memory: result.memory ? `${result.memory} KB` : undefined,
                     time: result.cpuTime ? `${result.cpuTime} s` : "N/A",
@@ -108,7 +109,7 @@ export const executeCode = async(req,res)=>{
             stdout: result.stdout,
             expected: result.expected,
             stderr: result.stderr,
-             compileOutput: result.compile_output,
+            compileOutput: result.compile_output,
             status: result.status,
              memory: result.memory,
              time: result.time,

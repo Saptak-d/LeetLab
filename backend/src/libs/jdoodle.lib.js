@@ -52,8 +52,6 @@ export const runCode = async (language, sourceCode, input) => {
   };
 };
 export const runCode2 = async (language, sourceCode, input) => {
-  console.log("language in the func runCode",language)
-  console.log("called thr funcn of runCode")
   const runtime = jdoodleRuntime[language];
   console.log("the runtime -",runtime)
 
