@@ -23,6 +23,7 @@ app.get("/",(req,res)=>{
 app.use("/api/v1/auth",authRoutes)
 app.use("/api/v1/problem",problemRoutes)
 app.use("/api/v1/execute-code",executionRoute)
+app.use("/api/v1/submission",submissionRoutes)
 
 app.listen(process.env.PORT,()=>{
  console.log("server is running on port 8080")
