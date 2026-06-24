@@ -301,15 +301,32 @@ export const deleteProblem = async (req, res) => {
 };
 
 export const getAllProblemsSolvedByUser = async(req,res)=>{
-  const {id} = req.params;
    try {
-    const problem = await db.problem.findManny({
+    const problems = await db.problem.findManny({
       where : {
-        solvedBy:req.user.id
+        solvedBy : {
+          some : {
+            userId : req.user.id
+          }
+        }
+      },
+      include : {
+        solvedBy : {
+          where : {
+            userId : req.user.id
+          }
+        }
       }
     })
+    res.status(200)
+       .json({
+        success : true ,
+        message : "problems fetched successfully",
+        problems
+       })
     
    } catch (error) {
-    
+    console.error("Error Fetching Problems :",error)
+    res.status(500).json({error : "Faild to Fetched problems"})
    }
 } 
