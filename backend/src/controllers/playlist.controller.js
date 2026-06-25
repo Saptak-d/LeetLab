@@ -24,7 +24,33 @@ export const createPlaylist = async(req,res)=>{
         res.status(500).json({error : "failed to create playlist"})
     }
 }
-export const getAllListDetails = async(req,res)=>{}
+export const getAllListDetails = async(req,res)=>{
+    try {
+        
+        const playlists = await db.playlist.findMany({
+            where :{
+                userId : req.user.id
+            },
+            include :{
+                problems : {
+                    include:{
+                        problem : true
+                    }
+                }
+            }
+        })
+        res.status(200)
+           .json({
+            success : true ,
+            message : "Playlist fetched successfully",
+            playlists
+           })
+
+    } catch (error) {
+        console.error("Error fetching playlist",error)
+        res.status(500).json({error : "faild to fetch playlist"})
+    }
+}
 
 export const  getPlayListDetails = async(req,res)=>{}
 
